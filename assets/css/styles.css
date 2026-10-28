@@ -4792,8 +4792,10 @@ body {
 }
 
 .contact-exec-desc {
-  font-size: 0.85rem;
-  color: #dadada;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.45;
   margin-bottom: 14px;
 }
 
