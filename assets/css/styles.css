@@ -4793,8 +4793,8 @@ body {
 
 .contact-exec-desc {
   font-size: 0.9rem;
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700 !important;
+  color: #1e293b !important;
   line-height: 1.45;
   margin-bottom: 14px;
 }
