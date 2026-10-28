@@ -4253,11 +4253,48 @@ body {
     grid-template-columns: repeat(2, 1fr);
     max-width: 100%;
   }
+  .guidance-thumb-wrap {
+    height: 115px;
+  }
+  .guidance-card-name {
+    white-space: normal;
+  }
 }
 @media (max-width: 500px) {
   .guidance-grid-row1,
   .guidance-grid-row2 {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .guidance-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .guidance-thumb-wrap {
+    height: 145px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .guidance-meta {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .guidance-badge {
+    font-size: 0.78rem;
+    padding: 3px 7px;
+    border-radius: 5px;
+  }
+  .guidance-card-name {
+    font-size: 1.02rem;
+    white-space: normal;
+  }
+  .guidance-desc {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .guidance-enquire-link {
+    font-size: 0.86rem;
   }
 }
 
@@ -4347,6 +4384,16 @@ body {
   }
   .how-step-arrow {
     display: none;
+  }
+  .disclaimer-banner {
+    align-items: flex-start;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .disclaimer-icon-circle {
+    width: 34px;
+    height: 34px;
+    font-size: 1.15rem;
   }
 }
 
@@ -4638,6 +4685,20 @@ body {
   .dest-cta-landmarks-img {
     opacity: 0.18;
     max-width: 180px;
+  }
+}
+@media (max-width: 600px) {
+  .services-cta-banner,
+  .destinations-cta-banner {
+    padding: 40px 0;
+  }
+  .services-cta-actions .btn-cta-white,
+  .services-cta-actions .btn-cta-blue,
+  .dest-cta-actions .btn-cta-white,
+  .dest-cta-actions .btn-cta-blue {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
   }
 }
 
