@@ -4949,24 +4949,29 @@ body {
 }
 
 /* ==========================================================================
-   About Page - Our Partners Section (University of Padua)
+   About Page - Our Partners Section (University of Padua & University of Milan)
    ========================================================================== */
-.partner-featured-card {
-  max-width: 960px;
-  margin: 32px auto 0 auto;
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  margin-top: 32px;
+}
+
+.partner-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
-  display: grid;
-  grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
-  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.partner-featured-card:hover {
-  transform: translateY(-3px);
+.partner-card:hover {
+  transform: translateY(-4px);
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
   border-color: #93c5fd;
 }
@@ -4975,20 +4980,19 @@ body {
   position: relative;
   display: block;
   overflow: hidden;
-  min-height: 280px;
+  height: 240px;
   background: #0f172a;
 }
 
 .partner-card-img {
   width: 100%;
   height: 100%;
-  min-height: 280px;
   object-fit: cover;
   display: block;
   transition: transform 0.4s ease;
 }
 
-.partner-featured-card:hover .partner-card-img {
+.partner-card:hover .partner-card-img {
   transform: scale(1.04);
 }
 
@@ -5007,10 +5011,10 @@ body {
 }
 
 .partner-card-content {
-  padding: 32px;
+  padding: 26px 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  flex-grow: 1;
 }
 
 .partner-badge {
@@ -5029,7 +5033,7 @@ body {
 
 .partner-title {
   font-family: var(--font-heading);
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #0f172a;
   margin: 0 0 4px 0;
@@ -5047,39 +5051,40 @@ body {
 }
 
 .partner-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #2563eb;
-  margin: 0 0 14px 0;
+  margin: 0 0 12px 0;
 }
 
 .partner-desc {
-  font-size: 0.94rem;
+  font-size: 0.92rem;
   color: #475569;
   line-height: 1.65;
-  margin: 0 0 22px 0;
+  margin: 0 0 20px 0;
+  flex-grow: 1;
 }
 
 .partner-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
+  margin-top: auto;
 }
 
 @media (max-width: 860px) {
-  .partner-featured-card {
+  .partners-grid {
     grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
   }
-  .partner-card-media,
-  .partner-card-img {
-    min-height: 220px;
-    max-height: 250px;
+  .partner-card-media {
+    height: 210px;
   }
   .partner-card-content {
-    padding: 22px 18px;
+    padding: 20px 18px;
   }
   .partner-title {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
 }
 
