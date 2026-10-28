@@ -232,15 +232,50 @@ window.googleTranslateElementInit = function() {
   }
 };
 
-// Determine initial language from googtrans cookie or localStorage
+// Language options metadata matching LanguageSwitcher.tsx
+const LANGUAGE_OPTIONS = [
+  {
+    code: 'en',
+    name: 'English (US)',
+    desktopLabel: 'English',
+    mobileLabel: 'EN',
+    flag: '🇺🇸',
+    locale: 'en-US'
+  },
+  {
+    code: 'si',
+    name: 'සිංහල',
+    desktopLabel: 'සිංහල',
+    mobileLabel: 'SI',
+    flag: '🇱🇰',
+    locale: 'si-LK'
+  },
+  {
+    code: 'ta',
+    name: 'தமிழ்',
+    desktopLabel: 'தமிழ்',
+    mobileLabel: 'TA',
+    flag: '🇱🇰',
+    locale: 'ta-LK'
+  }
+];
+
+// Determine initial language from localStorage ('language' or 'mrvc_lang') or googtrans cookie
 function getSavedLanguage() {
+  try {
+    const savedPrimary = localStorage.getItem('language');
+    if (savedPrimary) {
+      return normalizeLang(savedPrimary);
+    }
+    const savedLegacy = localStorage.getItem('mrvc_lang');
+    if (savedLegacy) {
+      return normalizeLang(savedLegacy);
+    }
+  } catch (_) {}
+
   const match = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([a-zA-Z\-]+)/);
   if (match && match[1]) {
     return normalizeLang(match[1]);
-  }
-  const saved = localStorage.getItem('mrvc_lang');
-  if (saved) {
-    return normalizeLang(saved);
   }
   return 'en';
 }
@@ -252,6 +287,8 @@ function applyTranslations(lang) {
   const norm = normalizeLang(lang);
   const dictKey = norm === 'ta' ? 'ta-LK' : (norm === 'si' ? 'si-LK' : 'en-US');
   const dict = I18N[dictKey] || I18N['en-US'];
+
+  document.documentElement.setAttribute('lang', dictKey);
 
   // Update text elements with data-i18n
   document.querySelectorAll('[data-i18n]').forEach(elem => {
@@ -270,11 +307,55 @@ function applyTranslations(lang) {
   });
 }
 
-// Change site language across UI dictionary and Google Translate engine
+// Update the floating LanguageSwitcher UI state to reflect the active language
+function updateLanguageSwitcherUI(langCode) {
+  const norm = normalizeLang(langCode);
+  const activeOpt = LANGUAGE_OPTIONS.find(o => o.code === norm) || LANGUAGE_OPTIONS[0];
+
+  document.querySelectorAll('.mrvc-lang-switcher').forEach(switcher => {
+    const desktopLbl = switcher.querySelector('.mrvc-lang-label-desktop');
+    const mobileLbl = switcher.querySelector('.mrvc-lang-label-mobile');
+    const triggerBtn = switcher.querySelector('.mrvc-lang-trigger');
+
+    if (desktopLbl) desktopLbl.textContent = activeOpt.desktopLabel;
+    if (mobileLbl) mobileLbl.textContent = activeOpt.mobileLabel;
+    if (triggerBtn) {
+      triggerBtn.setAttribute(
+        'aria-label',
+        `Current language: ${activeOpt.name}. Click to change language`
+      );
+    }
+
+    switcher.querySelectorAll('.mrvc-lang-option').forEach(optBtn => {
+      const code = optBtn.getAttribute('data-lang-code');
+      const isSelected = code === norm;
+      optBtn.classList.toggle('is-active', isSelected);
+      optBtn.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+
+      let checkEl = optBtn.querySelector('.mrvc-lang-check');
+      if (isSelected && !checkEl) {
+        checkEl = document.createElement('span');
+        checkEl.className = 'mrvc-lang-check';
+        checkEl.setAttribute('aria-hidden', 'true');
+        checkEl.textContent = '✔';
+        optBtn.appendChild(checkEl);
+      } else if (!isSelected && checkEl) {
+        checkEl.remove();
+      }
+    });
+  });
+}
+
+// Change site language across UI dictionary, localStorage, and Google Translate engine
 function changeSiteLanguage(targetLang) {
   const norm = normalizeLang(targetLang);
+  const prevLang = currentLang;
 
-  localStorage.setItem('mrvc_lang', norm);
+  try {
+    localStorage.setItem('language', norm);
+    localStorage.setItem('mrvc_lang', norm);
+  } catch (_) {}
+
   currentLang = norm;
 
   // Set Google Translate cookie
@@ -286,10 +367,11 @@ function changeSiteLanguage(targetLang) {
     document.cookie = `googtrans=${cookieValue}; domain=${hostname}; path=/;`;
   }
 
-  // Update all language select elements on the page
+  // Update any legacy select elements and the floating LanguageSwitcher UI
   document.querySelectorAll('#lang-select, .lang-select').forEach(sel => {
     sel.value = norm;
   });
+  updateLanguageSwitcherUI(norm);
 
   // Apply instant text translations for core components
   applyTranslations(norm);
@@ -299,10 +381,157 @@ function changeSiteLanguage(targetLang) {
   if (combo) {
     combo.value = norm;
     combo.dispatchEvent(new Event('change'));
-  } else {
-    // If Google Translate combo is still loading or to translate the full page DOM cleanly
+  } else if (prevLang !== norm && norm !== 'en') {
+    // If Google Translate combo is still loading for non-English full-page translation
+    window.location.reload();
+  } else if (prevLang !== 'en' && norm === 'en' && document.documentElement.classList.contains('translated-ltr')) {
     window.location.reload();
   }
+}
+
+window.changeSiteLanguage = changeSiteLanguage;
+
+// Mount the reusable LanguageSwitcher component across all pages
+function initLanguageSwitcher() {
+  let dock = document.getElementById('floating-lang-dock');
+  if (!dock) {
+    dock = document.createElement('div');
+    dock.id = 'floating-lang-dock';
+    document.body.appendChild(dock);
+  }
+
+  dock.className = 'mrvc-lang-switcher';
+  dock.setAttribute('aria-label', 'Language selector');
+
+  const activeOpt = LANGUAGE_OPTIONS.find(o => o.code === currentLang) || LANGUAGE_OPTIONS[0];
+
+  dock.innerHTML = `
+    <div id="mrvc-lang-dropdown" class="mrvc-lang-dropdown" role="listbox" aria-label="Select Website Language" aria-hidden="true">
+      <div class="mrvc-lang-dropdown-header">
+        <span class="mrvc-lang-globe" aria-hidden="true">🌐</span>
+        <span>Select Language</span>
+      </div>
+      <div class="mrvc-lang-options-list">
+        ${LANGUAGE_OPTIONS.map(opt => {
+          const isSelected = opt.code === currentLang;
+          return `
+            <button
+              type="button"
+              role="option"
+              data-lang-code="${opt.code}"
+              aria-selected="${isSelected ? 'true' : 'false'}"
+              tabindex="-1"
+              class="mrvc-lang-option${isSelected ? ' is-active' : ''}"
+            >
+              <span class="mrvc-lang-option-left">
+                <span class="mrvc-lang-flag" aria-hidden="true">${opt.flag}</span>
+                <span class="mrvc-lang-name">${opt.name}</span>
+              </span>
+              ${isSelected ? '<span class="mrvc-lang-check" aria-hidden="true">✔</span>' : ''}
+            </button>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    <button
+      type="button"
+      class="mrvc-lang-trigger"
+      aria-haspopup="listbox"
+      aria-expanded="false"
+      aria-controls="mrvc-lang-dropdown"
+      aria-label="Current language: ${activeOpt.name}. Click to change language"
+    >
+      <span class="mrvc-lang-globe" aria-hidden="true">🌐</span>
+      <span class="mrvc-lang-label-desktop">${activeOpt.desktopLabel}</span>
+      <span class="mrvc-lang-label-mobile">${activeOpt.mobileLabel}</span>
+      <span class="mrvc-lang-caret" aria-hidden="true">▼</span>
+    </button>
+  `;
+
+  const triggerBtn = dock.querySelector('.mrvc-lang-trigger');
+  const dropdown = dock.querySelector('.mrvc-lang-dropdown');
+  const optionBtns = Array.from(dock.querySelectorAll('.mrvc-lang-option'));
+  let isOpen = false;
+  let focusedIndex = Math.max(0, LANGUAGE_OPTIONS.findIndex(o => o.code === currentLang));
+
+  function setDropdownOpen(nextOpen, restoreFocus = false) {
+    isOpen = nextOpen;
+    dock.classList.toggle('is-open', isOpen);
+    dropdown?.classList.toggle('is-open', isOpen);
+    dropdown?.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    triggerBtn?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+    optionBtns.forEach(btn => {
+      btn.setAttribute('tabindex', isOpen ? '0' : '-1');
+    });
+
+    if (isOpen) {
+      focusedIndex = Math.max(0, LANGUAGE_OPTIONS.findIndex(o => o.code === currentLang));
+      requestAnimationFrame(() => {
+        optionBtns[focusedIndex]?.focus();
+      });
+    } else if (restoreFocus) {
+      triggerBtn?.focus();
+    }
+  }
+
+  triggerBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDropdownOpen(!isOpen);
+  });
+
+  optionBtns.forEach((btn, idx) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const selectedCode = btn.getAttribute('data-lang-code') || 'en';
+      focusedIndex = idx;
+      setDropdownOpen(false, true);
+      changeSiteLanguage(selectedCode);
+    });
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (isOpen && !dock.contains(e.target)) {
+      setDropdownOpen(false, false);
+    }
+  });
+
+  // Full keyboard navigation (ArrowUp, ArrowDown, Escape, Home, End, Tab)
+  dock.addEventListener('keydown', (e) => {
+    if (!isOpen) {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setDropdownOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setDropdownOpen(false, true);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusedIndex = (focusedIndex + 1) % optionBtns.length;
+      optionBtns[focusedIndex]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusedIndex = (focusedIndex - 1 + optionBtns.length) % optionBtns.length;
+      optionBtns[focusedIndex]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      focusedIndex = 0;
+      optionBtns[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      focusedIndex = optionBtns.length - 1;
+      optionBtns[focusedIndex]?.focus();
+    } else if (e.key === 'Tab') {
+      setDropdownOpen(false, false);
+    }
+  });
 }
 
 // Ensure Google Translate container and script are injected
@@ -383,7 +612,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, { passive: true });
 
-  // 4. Initialize Google Translate Script and Multilingual Selector
+  // 4. Initialize Google Translate Script and Multilingual Switcher
+  try {
+    localStorage.setItem('language', currentLang);
+    localStorage.setItem('mrvc_lang', currentLang);
+  } catch (_) {}
+
+  initLanguageSwitcher();
   ensureGoogleTranslateLoaded();
 
   document.querySelectorAll('#lang-select, .lang-select').forEach(sel => {

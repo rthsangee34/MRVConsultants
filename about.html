@@ -9,10 +9,10 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/css/styles.css?v=3.4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=3.5">
   <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
 </head>
 <body>
@@ -469,19 +469,51 @@
   </footer>
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/js/main.js?v=2.8"></script>
+  <script src="assets/js/main.js?v=3.5"></script>
 
-  <!-- FLOATING LANGUAGE SELECTOR AT BOTTOM-LEFT CORNER (AS REQUESTED) -->
-  <div class="floating-lang-dock" id="floating-lang-dock" aria-label="Language selector">
-    <div class="floating-lang-pill">
-      <span class="floating-lang-icon" aria-hidden="true">🌐</span>
-      <label for="floating-lang-select" class="sr-only">Choose Language</label>
-      <select id="floating-lang-select" class="lang-select floating-lang-select" aria-label="Translate Website Language">
-        <option value="en-US">English (US)</option>
-        <option value="ta-LK">தமிழ் (Tamil)</option>
-        <option value="si-LK">සිංහල (Sinhala)</option>
-      </select>
+  <!-- FLOATING LANGUAGE SWITCHER COMPONENT -->
+  <div id="floating-lang-dock" class="mrvc-lang-switcher" role="region" aria-label="Website language selector">
+    <div id="mrvc-lang-dropdown" class="mrvc-lang-dropdown" role="listbox" aria-label="Select Language" aria-hidden="true">
+      <div class="mrvc-lang-dropdown-header">
+        <span class="mrvc-lang-header-icon" aria-hidden="true">🌐</span>
+        <span>Select Language</span>
+      </div>
+      <ul class="mrvc-lang-list" role="presentation">
+        <li role="presentation">
+          <button type="button" role="option" aria-selected="true" class="mrvc-lang-option is-active" data-lang-code="en" data-lang-locale="en-US">
+            <span class="mrvc-lang-option-left">
+              <span class="mrvc-lang-flag" aria-hidden="true">🇺🇸</span>
+              <span class="mrvc-lang-name">English (US)</span>
+            </span>
+            <span class="mrvc-lang-check" aria-hidden="true">✔</span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" role="option" aria-selected="false" class="mrvc-lang-option" data-lang-code="si" data-lang-locale="si-LK">
+            <span class="mrvc-lang-option-left">
+              <span class="mrvc-lang-flag" aria-hidden="true">🇱🇰</span>
+              <span class="mrvc-lang-name">සිංහල</span>
+            </span>
+            <span class="mrvc-lang-check" aria-hidden="true"></span>
+          </button>
+        </li>
+        <li role="presentation">
+          <button type="button" role="option" aria-selected="false" class="mrvc-lang-option" data-lang-code="ta" data-lang-locale="ta-LK">
+            <span class="mrvc-lang-option-left">
+              <span class="mrvc-lang-flag" aria-hidden="true">🇱🇰</span>
+              <span class="mrvc-lang-name">தமிழ்</span>
+            </span>
+            <span class="mrvc-lang-check" aria-hidden="true"></span>
+          </button>
+        </li>
+      </ul>
     </div>
+    <button type="button" id="mrvc-lang-trigger" class="mrvc-lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="mrvc-lang-dropdown" aria-label="Current language: English (US). Click to select language">
+      <span class="mrvc-lang-globe" aria-hidden="true">🌐</span>
+      <span class="mrvc-lang-label-desktop">English</span>
+      <span class="mrvc-lang-label-mobile">EN</span>
+      <span class="mrvc-lang-caret" aria-hidden="true">▼</span>
+    </button>
   </div>
 
 </body>
