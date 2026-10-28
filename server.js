@@ -61,11 +61,11 @@ const CONTENT_SECURITY_POLICY = [
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://translate.googleapis.com https://www.gstatic.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: https: blob:",
-  "connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://translate.google.com https://challenges.cloudflare.com",
+  "connect-src 'self' https://formspree.io https://translate.googleapis.com https://translate-pa.googleapis.com https://translate.google.com https://challenges.cloudflare.com",
   "frame-src 'self' https://translate.google.com https://challenges.cloudflare.com",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  "form-action 'self' https://formspree.io",
   "frame-ancestors 'self'"
 ].join('; ');
 

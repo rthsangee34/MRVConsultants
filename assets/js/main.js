@@ -526,19 +526,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
       setButtonLoading(submitBtn, true, t.btnSubmitting);
 
+      // Silently drop spam bots filling the hidden honeypot field
+      if (honeypot) {
+        showAlert(alertBox, t.msgSuccess, 'success');
+        enquiryForm.reset();
+        setButtonLoading(submitBtn, false, t.btnSubmit);
+        return;
+      }
+
+      const formspreeEndpoint = enquiryForm.getAttribute('action') || 'https://formspree.io/f/xoeewaan';
+      const formspreePayload = {
+        _subject: `MRVC New Enquiry - ${service} - ${enquiryType}`,
+        _replyto: email,
+        fullName,
+        email,
+        whatsappNumber: whatsapp,
+        callingNumber: calling,
+        sameCallingNumber: sameCalling ? 'Yes' : 'No',
+        service,
+        destination: destination || 'Not specified',
+        enquiryType,
+        message,
+        privacyPolicyAccepted: consent ? 'Yes' : 'No',
+        policyVersion: '2026-10-v1',
+        lang: currentLang,
+        submittedAt: new Date().toISOString()
+      };
+
       try {
-        const response = await fetch('/api/feedback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
+        let submittedOk = false;
+        let errorMessage = t.msgError;
 
-        const data = await response.json().catch(() => ({}));
+        // If running on static host (e.g. GitHub Pages), send directly to Formspree;
+        // otherwise try local/serverless /api/feedback first and fall back to Formspree if unavailable.
+        const isStaticHost = window.location.hostname.endsWith('github.io') || window.location.protocol === 'file:';
 
-        if (response.ok && data.success) {
+        if (!isStaticHost) {
+          try {
+            const apiRes = await fetch('/api/feedback', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (apiRes.status !== 404 && apiRes.status !== 405) {
+              const apiData = await apiRes.json().catch(() => ({}));
+              if (apiRes.ok && apiData.success) {
+                submittedOk = true;
+              } else if (apiData.error) {
+                errorMessage = apiData.error;
+              }
+            }
+          } catch (_) {
+            // Fall through to direct Formspree submission
+          }
+        }
+
+        if (!submittedOk) {
+          const fsRes = await fetch(formspreeEndpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(formspreePayload)
+          });
+
+          const fsData = await fsRes.json().catch(() => ({}));
+          if (fsRes.ok) {
+            submittedOk = true;
+          } else if (fsData && Array.isArray(fsData.errors) && fsData.errors.length > 0) {
+            errorMessage = fsData.errors.map(err => err.message).join(', ');
+          }
+        }
+
+        if (submittedOk) {
           showAlert(alertBox, t.msgSuccess, 'success');
           enquiryForm.reset();
           if (callingInput) {
@@ -546,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
             callingInput.classList.remove('synced-input');
           }
         } else {
-          showAlert(alertBox, data.error || t.msgError, 'error');
+          showAlert(alertBox, errorMessage, 'error');
         }
       } catch (networkErr) {
         showAlert(alertBox, t.msgError, 'error');
