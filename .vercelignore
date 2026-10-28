@@ -1,0 +1,9 @@
+# Never upload secrets or dev-only files to Vercel
+.env
+.env.*
+.kilo/
+.kilocode/
+test/
+server.js
+*.md
+*.log

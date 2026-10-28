@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/lib/:path*", "destination": "/404", "permanent": false },
+    { "source": "/test/:path*", "destination": "/404", "permanent": false },
+    { "source": "/node_modules/:path*", "destination": "/404", "permanent": false },
+    { "source": "/server.js", "destination": "/404", "permanent": false },
+    { "source": "/package.json", "destination": "/404", "permanent": false },
+    { "source": "/package-lock.json", "destination": "/404", "permanent": false },
+    { "source": "/vercel.json", "destination": "/404", "permanent": false },
+    { "source": "/api/consultation.js", "destination": "/404", "permanent": false },
+    { "source": "/api/feedback.js", "destination": "/404", "permanent": false },
+    { "source": "/(.*)\\.md", "destination": "/404", "permanent": false },
+    { "source": "/\\.(.*)", "destination": "/404", "permanent": false }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://translate.googleapis.com https://www.gstatic.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://translate.googleapis.com https://translate-pa.googleapis.com https://translate.google.com https://challenges.cloudflare.com; frame-src 'self' https://translate.google.com https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    }
+  ]
+}
